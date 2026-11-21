@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}Register{% endblock %}
+
+{% block content %}
+<div class="auth-wrapper">
+  <section class="card auth-card">
+    <h1>Create an Account</h1>
+    <p class="muted">Register a new user account in the local SecVault SQLite database.</p>
+
+    <form method="post" action="{{ url_for('auth.register') }}" class="form-stack" novalidate>
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+
+      <div class="form-group">
+        <label for="username">Username</label>
+        <input id="username" name="username" type="text" value="{{ username }}" required autocomplete="username" placeholder="e.g. analyst_alex" />
+      </div>
+
+      <div class="form-group">
+        <label for="email">Email Address</label>
+        <input id="email" name="email" type="email" value="{{ email }}" required autocomplete="email" placeholder="alex@local.test" />
+      </div>
+
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input id="password" name="password" type="password" required autocomplete="new-password" data-password-meter="true" />
+        <div id="password-strength-meter" class="strength-meter" aria-live="polite"></div>
+        {% if not is_vulnerable %}
+          <small class="help-text">
+            Must be at least 10 characters with uppercase, lowercase, number, and special character.
+          </small>
+        {% else %}
+          <small class="help-text warning-text">
+            Vulnerable Mode: Password strength policy is disabled and passwords are stored in plaintext.
+          </small>
+        {% endif %}
+      </div>
+
+      <div class="form-group">
+        <label for="confirm_password">Confirm Password</label>
+        <input id="confirm_password" name="confirm_password" type="password" required autocomplete="new-password" />
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-full">Create Account</button>
+    </form>
+
+    <p class="auth-footer">
+      Already have an account? <a href="{{ url_for('auth.login') }}">Sign in here</a>.
+    </p>
+  </section>
+</div>
+{% endblock %}

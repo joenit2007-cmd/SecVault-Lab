@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Local CSRF Simulator{% endblock %}
+
+{% block content %}
+<section class="card auth-card">
+  <h1>Simulated Cross-Site Request Forgery (CSRF) Test Page</h1>
+  <p class="muted">
+    This local educational page simulates a malicious third-party site that submits a hidden
+    <code>POST /profile/update</code> request <strong>without</strong> a valid anti-CSRF token.
+  </p>
+
+  {% if current_user %}
+    <div class="alert alert-info">
+      Signed in as <strong>{{ current_user.username }}</strong> (current email: <code>{{ current_user.email }}</code>).
+    </div>
+  {% else %}
+    <div class="alert alert-warning">
+      You are not signed in yet. <a href="{{ url_for('auth.login') }}">Sign in first</a> so the browser holds an active session cookie, then return to this page.
+    </div>
+  {% endif %}
+
+  <form method="post" action="{{ url_for('dashboard.update_profile') }}" class="form-stack mt-1">
+    {# Intentionally omits csrf_token to simulate a cross-origin forged request #}
+    <div class="form-group">
+      <label for="forged_email">Attacker-Controlled Email Payload</label>
+      <input id="forged_email" name="email" type="email" value="attacker-csrf-test@local.invalid" required />
+    </div>
+    <button type="submit" class="btn btn-danger">Trigger Forged POST (No CSRF Token)</button>
+  </form>
+
+  <p class="small muted mt-1">
+    <strong>Expected in Vulnerable Mode:</strong> Request succeeds and overwrites the signed-in user's email.<br />
+    <strong>Expected in Secure Mode:</strong> Request is blocked with <code>403 Forbidden</code> (CSRF token missing).
+  </p>
+</section>
+{% endblock %}

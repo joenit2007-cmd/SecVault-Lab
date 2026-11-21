@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% block title %}Admin Panel{% endblock %}
+
+{% block content %}
+<section class="card">
+  <div class="section-header">
+    <div>
+      <h1>Administration &amp; Security Audit Panel</h1>
+      <p class="muted">Manage registered accounts, roles (RBAC), and inspect security audit events.</p>
+    </div>
+    <span class="badge {% if is_vulnerable %}badge-danger{% else %}badge-success{% endif %}">
+      {% if is_vulnerable %}RBAC BYPASSED (VULNERABLE){% else %}RBAC ENFORCED{% endif %}
+    </span>
+  </div>
+
+  <h2>Registered Users ({{ users | length }})</h2>
+  <div class="table-responsive">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Username</th>
+          <th>Email</th>
+          <th>Role</th>
+          <th>Notes</th>
+          <th>Created</th>
+          <th>Manage Role</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for u in users %}
+          <tr>
+            <td>#{{ u.id }}</td>
+            <td><strong>{{ u.username }}</strong></td>
+            <td>{{ u.email }}</td>
+            <td><span class="role-pill role-{{ u.role }}">{{ u.role }}</span></td>
+            <td>{{ u.note_count }}</td>
+            <td class="tiny muted">{{ u.created_at }}</td>
+            <td>
+              <form method="post" action="{{ url_for('admin.update_user_role', user_id=u.id) }}" class="inline-form">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                <select name="role" aria-label="Role for {{ u.username }}">
+                  <option value="user" {% if u.role == 'user' %}selected{% endif %}>user</option>
+                  <option value="admin" {% if u.role == 'admin' %}selected{% endif %}>admin</option>
+                </select>
+                <button type="submit" class="btn btn-sm btn-outline">Save</button>
+              </form>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="card mt-1">
+  <h2>Recent Security Audit Logs</h2>
+  <div class="table-responsive">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Timestamp</th>
+          <th>User</th>
+          <th>Action</th>
+          <th>Details</th>
+          <th>IP</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for log in audit_logs %}
+          <tr>
+            <td>#{{ log.id }}</td>
+            <td class="tiny muted">{{ log.created_at }}</td>
+            <td>{{ log.username }}</td>
+            <td><span class="badge badge-neutral">{{ log.action }}</span></td>
+            <td class="small">{{ log.details }}</td>
+            <td class="tiny muted">{{ log.ip_address }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

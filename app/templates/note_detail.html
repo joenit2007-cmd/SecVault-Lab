@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Note #{{ note.id }}{% endblock %}
+
+{% block content %}
+<section class="card">
+  <div class="section-header">
+    <div>
+      <span class="badge badge-info">{{ note.category }}</span>
+      <span class="muted small">Note #{{ note.id }} &bull; Owner: {{ note.author }} &bull; {{ note.created_at }}</span>
+    </div>
+    <a href="{{ url_for('dashboard.home') }}" class="btn btn-sm btn-outline">&larr; Back to Dashboard</a>
+  </div>
+
+  <h1 class="mt-1">
+    {% if is_vulnerable %}
+      {{ note.title | safe }}
+    {% else %}
+      {{ note.title }}
+    {% endif %}
+  </h1>
+
+  <div class="note-detail-body">
+    {% if is_vulnerable %}
+      {{ note.content | safe }}
+    {% else %}
+      {{ note.content }}
+    {% endif %}
+  </div>
+
+  <div class="note-actions mt-1">
+    <form method="post" action="{{ url_for('dashboard.delete_note', note_id=note.id) }}" class="inline-form" data-confirm="Delete this security note permanently?">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+      <button type="submit" class="btn btn-danger">Delete Note</button>
+    </form>
+  </div>
+</section>
+{% endblock %}

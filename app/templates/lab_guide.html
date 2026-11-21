@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}Local Testing Guide{% endblock %}
+
+{% block content %}
+<section class="card">
+  <h1>Local Vulnerability Assessment &amp; Remediation Lab Guide</h1>
+  <p class="muted">
+    Use these safe, local-only test cases against <code>http://127.0.0.1:5000</code> first in
+    <strong>Vulnerable Mode</strong> (<code>python run.py --mode vulnerable</code>) and then repeat them in
+    <strong>Secure Mode</strong> (<code>python run.py --mode secure</code>) to verify every remediation.
+  </p>
+
+  <div class="lab-grid">
+    <article class="lab-card">
+      <h3>1. SQL Injection (OWASP A03)</h3>
+      <p><strong>Login Bypass:</strong> On <code>/login</code>, enter username:</p>
+      <div class="code-copy">
+        <code>' OR '1'='1' --</code>
+        <button type="button" class="btn btn-sm btn-outline" data-copy="' OR '1'='1' --">Copy</button>
+      </div>
+      <p><strong>Search Data Leakage:</strong> On <code>/dashboard</code> search box, submit:</p>
+      <div class="code-copy">
+        <code>' OR '1'='1' --</code>
+        <button type="button" class="btn btn-sm btn-outline" data-copy="' OR '1'='1' --">Copy</button>
+      </div>
+      <p class="small muted"><strong>Secure Result:</strong> Parameterized queries treat input as literal text; login fails and only your own notes remain visible.</p>
+    </article>
+
+    <article class="lab-card">
+      <h3>2. Cross-Site Scripting — XSS (OWASP A03)</h3>
+      <p><strong>Reflected XSS:</strong> Search on <code>/dashboard</code> with:</p>
+      <div class="code-copy">
+        <code>&lt;script&gt;alert('XSS_Reflected_Demo')&lt;/script&gt;</code>
+        <button type="button" class="btn btn-sm btn-outline" data-copy="<script>alert('XSS_Reflected_Demo')</script>">Copy</button>
+      </div>
+      <p><strong>Stored XSS:</strong> Create a note containing an HTML/JS payload.</p>
+      <p class="small muted"><strong>Secure Result:</strong> Jinja2 autoescaping renders tags harmlessly as text, and CSP blocks inline scripts.</p>
+    </article>
+
+    <article class="lab-card">
+      <h3>3. Broken Access Control (OWASP A01)</h3>
+      <p><strong>IDOR:</strong> Sign in as a second user and visit another user's note URL such as <code>/notes/1</code>.</p>
+      <p><strong>Vertical Privilege Escalation:</strong> As a normal <code>user</code>, navigate directly to <code>/admin</code>.</p>
+      <p class="small muted"><strong>Secure Result:</strong> Server-side ownership and RBAC checks return <code>403 Forbidden</code> and record an audit event.</p>
+    </article>
+
+    <article class="lab-card">
+      <h3>4. Authentication Failures (OWASP A07)</h3>
+      <p><strong>Weak Passwords &amp; Plaintext:</strong> Register with password <code>123</code> in vulnerable mode.</p>
+      <p><strong>Brute Force &amp; Enumeration:</strong> Submit 6 wrong passwords on <code>/login</code>.</p>
+      <p class="small muted"><strong>Secure Result:</strong> Enforces strong password rules, salted PBKDF2-SHA256 hashing, generic login errors, and HTTP <code>429</code> lockout after 5 failures.</p>
+    </article>
+
+    <article class="lab-card">
+      <h3>5. Security Misconfiguration (OWASP A05)</h3>
+      <p><strong>Exposed Diagnostics:</strong> Visit <a href="{{ url_for('main.debug_info') }}"><code>/debug/info</code></a> and <a href="{{ url_for('main.debug_error_test') }}"><code>/debug/error-test</code></a>.</p>
+      <p><strong>HTTP Headers:</strong> Inspect response headers in DevTools (<code>CSP</code>, <code>X-Frame-Options</code>, <code>X-Content-Type-Options</code>, <code>HttpOnly</code> cookie).</p>
+      <p class="small muted"><strong>Secure Result:</strong> Debug endpoints return <code>404</code>, headers are hardened, and cookies enforce <code>HttpOnly</code> &amp; <code>SameSite=Lax</code>.</p>
+    </article>
+
+    <article class="lab-card">
+      <h3>6. Cross-Site Request Forgery — CSRF (CWE-352)</h3>
+      <p><strong>Forged State Change:</strong> While signed in, open the <a href="{{ url_for('main.csrf_demo') }}">Local CSRF Simulator</a> and trigger the forged POST without a CSRF token.</p>
+      <p class="small muted"><strong>Secure Result:</strong> Missing/invalid CSRF token is rejected with <code>403 Forbidden</code> and logged as <code>CSRF_BLOCKED</code>.</p>
+    </article>
+  </div>
+</section>
+{% endblock %}

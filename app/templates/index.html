@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}Overview{% endblock %}
+
+{% block content %}
+<section class="hero card">
+  <div class="hero-content">
+    <h1>Web Application Security Assessment &amp; Secure Implementation</h1>
+    <p class="lead">
+      SecVault is a local Flask &amp; SQLite web application built for hands-on OWASP vulnerability testing
+      and secure remediation verification. Run in <strong>Vulnerable Mode</strong> to observe weaknesses safely,
+      then switch to <strong>Secure Mode</strong> to verify every defense.
+    </p>
+    <div class="hero-actions">
+      {% if g.user %}
+        <a href="{{ url_for('dashboard.home') }}" class="btn btn-primary">Open Dashboard</a>
+      {% else %}
+        <a href="{{ url_for('auth.register') }}" class="btn btn-primary">Create Account</a>
+        <a href="{{ url_for('auth.login') }}" class="btn btn-outline">Sign In</a>
+      {% endif %}
+      <a href="{{ url_for('main.lab_guide') }}" class="btn btn-outline">View Local Testing Guide</a>
+      <a href="{{ url_for('main.csrf_demo') }}" class="btn btn-outline">CSRF Local Simulator</a>
+    </div>
+  </div>
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-value">{{ user_count }}</div>
+      <div class="stat-label">Registered Users</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">{{ note_count }}</div>
+      <div class="stat-label">Security Notes</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">{{ audit_count }}</div>
+      <div class="stat-label">Audit Log Events</div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <h2>Active Security Posture ({{ security_mode | upper }})</h2>
+  <div class="controls-grid">
+    {% for ctrl in security_controls %}
+      <div class="card control-card">
+        <div class="control-header">
+          <strong>{{ ctrl.name }}</strong>
+          {% if ctrl.enabled %}
+            <span class="badge badge-success">PROTECTED</span>
+          {% else %}
+            <span class="badge badge-danger">VULNERABLE</span>
+          {% endif %}
+        </div>
+        <div class="muted small">{{ ctrl.owasp }}</div>
+        <p class="control-detail">{{ ctrl.detail }}</p>
+      </div>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

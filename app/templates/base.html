@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}SecVault{% endblock %} | WebApp Security Assessment</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+</head>
+<body>
+  <div class="mode-banner {% if is_vulnerable %}mode-banner-vulnerable{% else %}mode-banner-secure{% endif %}">
+    <div class="container mode-banner-inner">
+      {% if is_vulnerable %}
+        <span class="badge badge-danger">VULNERABLE LAB MODE</span>
+        <span>Controlled local security testing only — intentional OWASP weaknesses are ACTIVE.</span>
+      {% else %}
+        <span class="badge badge-success">SECURE MODE</span>
+        <span>Hardened implementation — Parameterized SQL, Output Encoding, PBKDF2, RBAC, CSRF, and Security Headers active.</span>
+      {% endif %}
+    </div>
+  </div>
+
+  <header class="navbar">
+    <div class="container navbar-inner">
+      <a class="brand" href="{{ url_for('main.index') }}">
+        <span class="brand-shield" aria-hidden="true">&#128737;</span>
+        <span>SecVault Lab</span>
+      </a>
+      <nav class="nav-links" aria-label="Main navigation">
+        <a href="{{ url_for('main.index') }}">Overview</a>
+        <a href="{{ url_for('main.lab_guide') }}">Lab Guide</a>
+        {% if g.user %}
+          <a href="{{ url_for('dashboard.home') }}">Dashboard</a>
+          <a href="{{ url_for('dashboard.profile') }}">Profile</a>
+          {% if g.user.role == 'admin' or is_vulnerable %}
+            <a href="{{ url_for('admin.panel') }}">Admin Panel</a>
+          {% endif %}
+          <span class="nav-user">{{ g.user.username }} <span class="role-pill role-{{ g.user.role }}">{{ g.user.role }}</span></span>
+          <form method="post" action="{{ url_for('auth.logout') }}" class="inline-form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+            <button type="submit" class="btn btn-sm btn-outline">Logout</button>
+          </form>
+        {% else %}
+          <a href="{{ url_for('auth.login') }}">Login</a>
+          <a href="{{ url_for('auth.register') }}" class="btn btn-sm btn-primary">Register</a>
+        {% endif %}
+      </nav>
+    </div>
+  </header>
+
+  <main class="container main-content">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="flash-stack" role="status">
+          {% for category, message in messages %}
+            <div class="alert alert-{{ category }}">{{ message }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="footer">
+    <div class="container footer-inner">
+      <span>SecVault — Web Application Security Assessment &amp; Secure Implementation</span>
+      <span>Mode: <strong>{{ security_mode | upper }}</strong> | Localhost Academic Environment</span>
+    </div>
+  </footer>
+
+  <script src="{{ url_for('static', filename='js/app.js') }}" defer></script>
+</body>
+</html>

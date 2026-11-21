@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Profile{% endblock %}
+
+{% block content %}
+<div class="auth-wrapper">
+  <section class="card auth-card">
+    <h1>Account Profile</h1>
+    <p class="muted">Manage your account details and review your active session attributes.</p>
+
+    <dl class="profile-meta">
+      <div><dt>Username</dt><dd>{{ g.user.username }}</dd></div>
+      <div><dt>Role</dt><dd><span class="role-pill role-{{ g.user.role }}">{{ g.user.role }}</span></dd></div>
+      <div><dt>Current Email</dt><dd>{{ g.user.email }}</dd></div>
+      <div><dt>Created</dt><dd>{{ g.user.created_at }}</dd></div>
+    </dl>
+
+    <hr class="divider" />
+
+    <h2>Update Email Address</h2>
+    <form method="post" action="{{ url_for('dashboard.update_profile') }}" class="form-stack">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+
+      <div class="form-group">
+        <label for="email">New Email Address</label>
+        <input id="email" name="email" type="email" value="{{ g.user.email }}" required />
+      </div>
+
+      <button type="submit" class="btn btn-primary">Update Email</button>
+    </form>
+
+    {% if is_vulnerable %}
+      <div class="alert alert-warning mt-1">
+        <strong>Vulnerable Lab Note:</strong> This form does not enforce CSRF token validation in vulnerable mode.
+        Test it safely using the <a href="{{ url_for('main.csrf_demo') }}">Local CSRF Simulator</a>.
+      </div>
+    {% endif %}
+  </section>
+</div>
+{% endblock %}

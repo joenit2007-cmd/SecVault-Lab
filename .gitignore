@@ -1,0 +1,52 @@
+# Python bytecode and caches
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+dist/
+build/
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+env/
+
+# Environment variables, secrets, keys, credentials, and sessions (NEVER commit)
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+secrets.txt
+credentials*.txt
+credentials*.json
+passwords*.txt
+cookies*.txt
+flask_session/
+
+# SQLite databases and Flask instance directory (NEVER commit runtime DBs)
+instance/
+*.db
+*.sqlite
+*.sqlite3
+*.db-journal
+*.db-wal
+*.db-shm
+
+# Pytest and coverage caches
+.pytest_cache/
+.coverage
+htmlcov/
+
+# IDE, OS, and temporary files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.log
+*.tmp
+*.bak
+*.swp
+*~

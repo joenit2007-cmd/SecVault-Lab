@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+  <div>
+    <h1>Security Notes Dashboard</h1>
+    <p class="muted">Welcome, <strong>{{ g.user.username }}</strong> ({{ g.user.email }}). Manage your private assessment notes below.</p>
+  </div>
+  <div class="stat-pill">
+    <span>Your Notes: <strong>{{ total_notes }}</strong></span>
+    <span>Role: <strong>{{ g.user.role | upper }}</strong></span>
+  </div>
+</div>
+
+<div class="dashboard-layout">
+  <section class="card">
+    <h2>Create Security Note</h2>
+    <form method="post" action="{{ url_for('dashboard.create_note') }}" class="form-stack">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+
+      <div class="form-group">
+        <label for="title">Title</label>
+        <input id="title" name="title" type="text" required maxlength="120" placeholder="e.g. SQLi Finding in Login Form" />
+      </div>
+
+      <div class="form-group">
+        <label for="category">Category</label>
+        <select id="category" name="category">
+          {% for cat in categories %}
+            <option value="{{ cat }}">{{ cat }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="content">Details</label>
+        <textarea id="content" name="content" rows="4" required maxlength="2000" placeholder="Record observation, impact, and remediation steps..."></textarea>
+      </div>
+
+      <button type="submit" class="btn btn-primary">Save Note</button>
+    </form>
+
+    <div class="activity-box">
+      <h3>Recent Account Activity</h3>
+      {% if recent_events %}
+        <ul class="activity-list">
+          {% for ev in recent_events %}
+            <li>
+              <span class="badge badge-neutral">{{ ev.action }}</span>
+              <span class="small">{{ ev.details }}</span>
+              <span class="muted tiny">{{ ev.created_at }}</span>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="muted small">No recent events recorded yet.</p>
+      {% endif %}
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="section-header">
+      <h2>Your Notes</h2>
+      <form method="get" action="{{ url_for('dashboard.home') }}" class="search-form">
+        <input type="text" name="q" value="{{ search_query }}" placeholder="Search notes..." aria-label="Search notes" />
+        <button type="submit" class="btn btn-sm btn-primary">Search</button>
+        {% if search_query %}
+          <a href="{{ url_for('dashboard.home') }}" class="btn btn-sm btn-outline">Clear</a>
+        {% endif %}
+      </form>
+    </div>
+
+    {% if search_query %}
+      <p class="search-banner">
+        Showing results for:
+        {% if is_vulnerable %}
+          {# INTENTIONALLY VULNERABLE: Reflected XSS demonstration #}
+          <span class="search-term">{{ search_query | safe }}</span>
+        {% else %}
+          <span class="search-term">{{ search_query }}</span>
+        {% endif %}
+      </p>
+    {% endif %}
+
+    {% if sql_error %}
+      <div class="alert alert-danger">
+        <strong>SQLite Error (Information Disclosure):</strong> {{ sql_error }}
+      </div>
+    {% endif %}
+
+    {% if notes %}
+      <div class="notes-list">
+        {% for note in notes %}
+          <article class="note-card">
+            <div class="note-meta">
+              <span class="badge badge-info">{{ note.category }}</span>
+              <span class="muted tiny">Note #{{ note.id }} &bull; Author: {{ note.author }} &bull; {{ note.created_at }}</span>
+            </div>
+            <h3>
+              <a href="{{ url_for('dashboard.view_note', note_id=note.id) }}">
+                {% if is_vulnerable %}
+                  {# INTENTIONALLY VULNERABLE: Stored XSS demonstration #}
+                  {{ note.title | safe }}
+                {% else %}
+                  {{ note.title }}
+                {% endif %}
+              </a>
+            </h3>
+            <p class="note-body">
+              {% if is_vulnerable %}
+                {{ note.content | safe }}
+              {% else %}
+                {{ note.content }}
+              {% endif %}
+            </p>
+            <div class="note-actions">
+              <a href="{{ url_for('dashboard.view_note', note_id=note.id) }}" class="btn btn-sm btn-outline">View</a>
+              <form method="post" action="{{ url_for('dashboard.delete_note', note_id=note.id) }}" class="inline-form" data-confirm="Delete this security note?">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+              </form>
+            </div>
+          </article>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="empty-state">
+        <p>No notes found. Create your first security note using the form on the left.</p>
+      </div>
+    {% endif %}
+  </section>
+</div>
+{% endblock %}

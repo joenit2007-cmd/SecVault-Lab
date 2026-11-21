@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}500 Server Error{% endblock %}
+{% block content %}
+<section class="card error-card">
+  <span class="badge badge-danger">HTTP 500</span>
+  <h1>Internal Server Error</h1>
+  <p>An unexpected error occurred while processing your request.</p>
+  {% if debug_trace %}
+    <div class="alert alert-warning mt-1">
+      <strong>Verbose Debug Disclosure (Vulnerable Mode Only):</strong>
+      <pre class="trace-box">{{ debug_trace }}</pre>
+    </div>
+  {% endif %}
+  <a href="{{ url_for('main.index') }}" class="btn btn-primary mt-1">Return Home</a>
+</section>
+{% endblock %}

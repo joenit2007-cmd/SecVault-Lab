@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}404 Not Found{% endblock %}
+{% block content %}
+<section class="card error-card">
+  <span class="badge badge-neutral">HTTP 404</span>
+  <h1>Resource Not Found</h1>
+  <p>The page or resource you requested does not exist or is disabled.</p>
+  <a href="{{ url_for('main.index') }}" class="btn btn-primary mt-1">Return Home</a>
+</section>
+{% endblock %}
